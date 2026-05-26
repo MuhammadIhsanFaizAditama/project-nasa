@@ -1,36 +1,34 @@
-import api from './api';
+const NASA_BASE = 'https://api.nasa.gov/planetary';
+const NASA_IMAGE_BASE = 'https://images-api.nasa.gov';
 
-/**
- * Fetch Astronomy Picture of the Day (APOD) from the secure backend proxy.
- *
- * @returns {Promise<Object>}
- */
-export async function fetchApod() {
-  const res = await api.get('/apod');
-  return res.data;
+export async function fetchApod(apiKey) {
+  const key = apiKey || import.meta.env.VITE_NASA_KEY || 'DEMO_KEY';
+  const res = await fetch(`${NASA_BASE}/apod?api_key=${key}`);
+  if (!res.ok) throw new Error('Failed to fetch APOD');
+  return res.json();
 }
 
-/**
- * Search NASA Image and Video Library through secure backend proxy.
- *
- * @param {string} query
- * @param {string} mediaType
- * @returns {Promise<Object>}
- */
+export async function fetchNasaImage(query) {
+  try {
+    const res = await fetch(`${NASA_IMAGE_BASE}/search?q=${encodeURIComponent(query)}&media_type=image&page_size=1`);
+    if (!res.ok) return null;
+    const data = await res.json();
+    const items = data.collection?.items;
+    if (!items || items.length === 0) return null;
+    return items[0].links?.[0]?.href || null;
+  } catch {
+    return null;
+  }
+}
+
 export async function searchNasaLibrary(query, mediaType = 'image,video') {
-  const res = await api.get('/nasa-search', {
-    params: { q: query, media_type: mediaType }
-  });
-  return res.data;
+  const res = await fetch(`${NASA_IMAGE_BASE}/search?q=${encodeURIComponent(query)}&media_type=${mediaType}&page_size=24`);
+  if (!res.ok) throw new Error('Failed to search NASA library');
+  return res.json();
 }
 
-/**
- * Fetch manifest media asset from secure backend proxy.
- *
- * @param {string} nasaId
- * @returns {Promise<Object>}
- */
 export async function getNasaAsset(nasaId) {
-  const res = await api.get(`/nasa-asset/${nasaId}`);
-  return res.data;
+  const res = await fetch(`${NASA_IMAGE_BASE}/asset/${nasaId}`);
+  if (!res.ok) throw new Error('Failed to get NASA asset');
+  return res.json();
 }

@@ -12,25 +12,29 @@ import KelolaArtikel from '../pages/admin/KelolaArtikel';
 import KelolaKategori from '../pages/admin/KelolaKategori';
 import KelolaApod from '../pages/admin/KelolaApod';
 import ProtectedRoute from '../routes/ProtectedRoute';
+import PublicLayout from '../components/layout/PublicLayout';
+import AdminLayout from '../components/layout/AdminLayout';
 
 export default function AppRoutes() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Public */}
+        {/* Landing & Login */}
         <Route path="/" element={<LandingPage />} />
-        <Route path="/home" element={<Home />} />
-        <Route path="/artikel" element={<ArtikelList />} />
-        <Route path="/artikel/:id" element={<ArtikelDetail />} />
-        <Route path="/apod" element={<ApodView />} />
-        <Route path="/nasa-gallery" element={<NasaLibrary />} />
         <Route path="/login" element={<Login />} />
 
-        {/* Admin - Protected */}
-        <Route path="/admin" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-        <Route path="/admin/artikel" element={<ProtectedRoute><KelolaArtikel /></ProtectedRoute>} />
-        <Route path="/admin/kategori" element={<ProtectedRoute><KelolaKategori /></ProtectedRoute>} />
-        <Route path="/admin/apod" element={<ProtectedRoute><KelolaApod /></ProtectedRoute>} />
+        {/* Public */}
+        <Route path="/home" element={<PublicLayout><Home /></PublicLayout>} />
+        <Route path="/artikel" element={<PublicLayout><ArtikelList /></PublicLayout>} />
+        <Route path="/artikel/:id" element={<PublicLayout><ArtikelDetail /></PublicLayout>} />
+        <Route path="/apod" element={<PublicLayout><ApodView /></PublicLayout>} />
+        <Route path="/nasa-library" element={<PublicLayout><NasaLibrary /></PublicLayout>} />
+
+        {/* Admin */}
+        <Route path="/admin" element={<ProtectedRoute><AdminLayout><Dashboard /></AdminLayout></ProtectedRoute>} />
+        <Route path="/admin/artikel" element={<ProtectedRoute><AdminLayout><KelolaArtikel /></AdminLayout></ProtectedRoute>} />
+        <Route path="/admin/kategori" element={<ProtectedRoute><AdminLayout><KelolaKategori /></AdminLayout></ProtectedRoute>} />
+        <Route path="/admin/apod" element={<ProtectedRoute><AdminLayout><KelolaApod /></AdminLayout></ProtectedRoute>} />
       </Routes>
     </BrowserRouter>
   );

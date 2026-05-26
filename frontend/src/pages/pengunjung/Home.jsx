@@ -1,16 +1,65 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getArtikelList } from '../../services/artikelService';
-import { fetchApod } from '../../services/nasaService';
-import 'bootstrap/dist/css/bootstrap.min.css';
+import { fetchApod, fetchNasaImage } from '../../services/nasaService';
 
 const StarBadge = () => (
-  <span className="badge-icon d-inline-flex align-items-center justify-content-center me-2">
-    <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+  <span className="d-inline-flex align-items-center justify-content-center me-2 flex-shrink-0"
+    style={{ width: 28, height: 28, borderRadius: '50%', border: '1px solid rgba(0,195,255,0.35)', background: 'rgba(0,195,255,0.08)' }}>
+    <svg width="14" height="14" viewBox="0 0 16 16" fill="#09f" xmlns="http://www.w3.org/2000/svg">
       <path d="M8 0l2.45 5.57L16 6.45l-4 3.9.95 5.55L8 12.9 3.05 15.9 4 9.85 0 5.9l5.55-.88L8 0z" />
     </svg>
   </span>
 );
+
+  const ArticleCard = ({ article, onClick }) => {
+  const [imgSrc, setImgSrc] = useState(article.image || null);
+  const [imgLoading, setImgLoading] = useState(!article.image);
+
+  useEffect(() => {
+    if (!article.image) {
+      fetchNasaImage(article.title)
+        .then(url => setImgSrc(url))
+        .finally(() => setImgLoading(false));
+    }
+  }, [article]);
+
+  return (
+    <div className="d-flex flex-column h-100"
+      style={{ background: '#07101b', border: '1px solid rgba(255,255,255,0.08)', cursor: 'pointer', transition: 'transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease' }}
+      onClick={onClick}
+      onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.borderColor = 'rgba(0,195,255,0.3)'; e.currentTarget.style.boxShadow = '0 0 20px rgba(0,195,255,0.08)'; }}
+      onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'; e.currentTarget.style.boxShadow = 'none'; }}
+    >
+      <div style={{ height: 160, overflow: 'hidden', background: 'rgba(0,195,255,0.05)' }}>
+        {imgLoading ? (
+          <div className="d-flex justify-content-center align-items-center h-100">
+            <div className="spinner-border spinner-border-sm" style={{ color: '#09f' }} />
+          </div>
+        ) : imgSrc ? (
+          <img src={imgSrc} alt={article.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+        ) : (
+          <div className="d-flex justify-content-center align-items-center h-100">
+            <svg width="32" height="32" viewBox="0 0 16 16" fill="rgba(0,195,255,0.2)" xmlns="http://www.w3.org/2000/svg">
+              <path d="M8 0l2.45 5.57L16 6.45l-4 3.9.95 5.55L8 12.9 3.05 15.9 4 9.85 0 5.9l5.55-.88L8 0z" />
+            </svg>
+          </div>
+        )}
+      </div>
+      <div className="d-flex flex-column flex-grow-1 p-4">
+        <div className="d-flex align-items-start mb-2">
+          <StarBadge />
+          <h5 className="mb-0 text-white fw-semibold" style={{ fontSize: '0.95rem', lineHeight: 1.4 }}>{article.title}</h5>
+        </div>
+        <small className="text-white-50 d-block mb-3" style={{ fontSize: '0.75rem' }}>{article.category} • {article.author}</small>
+        <p className="text-white-50 mb-0 flex-grow-1" style={{ fontSize: '0.875rem', lineHeight: 1.7 }}>{article.content.substring(0, 100)}...</p>
+        <div className="mt-3 pt-3" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+          <span style={{ color: '#09f', fontSize: '0.8rem', letterSpacing: '0.08em' }}>Baca Selengkapnya →</span>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 export default function Home() {
   const navigate = useNavigate();
@@ -21,13 +70,12 @@ export default function Home() {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    Promise.all([
-      getArtikelList(),
-      fetchApod(),
-    ]).then(([artikelRes, apodRes]) => {
-      setArticles(artikelRes.data);
-      setApod(apodRes);
-    }).catch(() => setError('Gagal memuat data.'))
+    Promise.all([getArtikelList(), fetchApod()])
+      .then(([artikelRes, apodRes]) => {
+        setArticles(artikelRes.data);
+        setApod(apodRes);
+      })
+      .catch(() => setError('Gagal memuat data.'))
       .finally(() => setLoading(false));
   }, []);
 
@@ -37,166 +85,96 @@ export default function Home() {
   );
 
   return (
-    <section
-      className="min-vh-100 vw-100 m-0 p-0"
-      style={{
-        background: 'radial-gradient(circle at top left, rgba(0, 195, 255, 0.08), transparent 26%), radial-gradient(circle at bottom right, rgba(3, 45, 99, 0.18), transparent 30%), #000',
-      }}
-    >
-      <div className="container-fluid px-5 py-5">
-        <div className="row justify-content-center">
-          <div className="col-12 col-xl-10">
+    <section className="py-5 px-4 px-lg-5"
+      style={{ minHeight: '100vh', background: 'radial-gradient(circle at top left, rgba(0,195,255,0.06), transparent 30%), #020305' }}>
+      <div className="container-fluid" style={{ maxWidth: 1200 }}>
 
-            {/* APOD Section */}
-            {apod && (
-              <div className="mb-5">
-                <div className="d-flex align-items-center text-primary mb-3">
-                  <StarBadge />
-                  <span className="text-uppercase small letter-spacing-2">Astronomy Picture of the Day</span>
-                </div>
-                <div
-                  className="position-relative rounded-0 overflow-hidden border border-1 cursor-pointer"
-                  style={{ borderColor: 'rgba(0,195,255,0.25)', cursor: 'pointer' }}
-                  onClick={() => navigate('/apod')}
-                >
-                  {apod.media_type === 'image' ? (
-                    <img
-                      src={apod.url}
-                      alt={apod.title}
-                      className="w-100"
-                      style={{ maxHeight: 420, objectFit: 'cover', display: 'block' }}
-                    />
-                  ) : (
-                    <div className="ratio ratio-16x9">
-                      <iframe src={apod.url} title={apod.title} allowFullScreen />
-                    </div>
-                  )}
-                  <div
-                    className="position-absolute bottom-0 start-0 end-0 p-4"
-                    style={{ background: 'linear-gradient(transparent, rgba(0,0,0,0.85))' }}
-                  >
-                    <small className="text-white-50">{apod.date}</small>
-                    <h2 className="h4 fw-bold text-white mb-1">{apod.title}</h2>
-                    <p className="text-white-50 mb-0 small">{apod.explanation.substring(0, 120)}...</p>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* NASA Gallery Banner */}
-            <div className="mb-5 p-4 border border-1 rounded-0" style={{ borderColor: 'rgba(0, 195, 255, 0.35)', background: 'linear-gradient(135deg, rgba(0, 195, 255, 0.08) 0%, rgba(3, 45, 99, 0.15) 100%)' }}>
-              <div className="row align-items-center">
-                <div className="col-12 col-md-8 mb-3 mb-md-0">
-                  <div className="d-flex align-items-center text-primary mb-2">
-                    <StarBadge />
-                    <span className="text-uppercase small letter-spacing-2">Fitur Eksplorasi</span>
-                  </div>
-                  <h3 className="h4 fw-bold text-white mb-2">NASA Image & Video Library</h3>
-                  <p className="text-white-50 small mb-0">Jelajahi ribuan dokumentasi foto spektakuler dan rekaman video bersejarah perjalanan antariksa resmi dari NASA.</p>
-                </div>
-                <div className="col-12 col-md-4 text-md-end">
-                  <button className="btn btn-outline-neon px-4 py-2 rounded-0 w-100 w-md-auto" onClick={() => navigate('/nasa-gallery')}>
-                    Mulai Jelajah Galeri →
-                  </button>
-                </div>
-              </div>
+        {/* APOD */}
+        {apod && (
+          <div className="mb-5">
+            <div className="d-flex align-items-center mb-3" style={{ color: '#09f' }}>
+              <StarBadge />
+              <span className="text-uppercase small" style={{ letterSpacing: '0.3em' }}>Astronomy Picture of the Day</span>
             </div>
-
-            {/* Header Artikel */}
-            <div className="pb-4 mb-4 border-bottom border-2 border-primary border-opacity-25">
-              <div className="d-flex align-items-center text-primary mb-2">
-                <StarBadge />
-                <span className="text-uppercase small letter-spacing-2">Daftar Artikel</span>
-              </div>
-              <h1 className="display-5 fw-bold text-white" style={{ letterSpacing: '0.28em' }}>
-                Koleksi Artikel Astronomi
-              </h1>
-              <p className="text-white-50 mb-0" style={{ maxWidth: '760px' }}>
-                Jelajahi artikel edukatif dengan gaya modern, garis neon, dan struktur yang jelas.
-              </p>
-            </div>
-
-            {/* Search */}
-            <div className="row justify-content-center mb-5">
-              <div className="col-12 col-md-7">
-                <div className="input-group bg-black rounded-0 border border-2 border-primary p-1 shadow-sm">
-                  <input
-                    type="search"
-                    className="form-control rounded-0 bg-transparent border-0 text-white"
-                    placeholder="Cari artikel astronomi..."
-                    value={query}
-                    onChange={(e) => setQuery(e.target.value)}
-                    style={{ minHeight: '56px' }}
-                  />
-                  <button className="btn btn-outline-neon rounded-0 px-4" type="button" onClick={() => setQuery('')}>
-                    Clear
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {loading && <div className="text-center py-5"><div className="spinner-border text-light" /></div>}
-            {error && <div className="alert alert-danger">{error}</div>}
-
-            {/* Artikel Grid */}
-            <div className="row g-4">
-              {!loading && filtered.length === 0 && (
-                <div className="col-12">
-                  <p className="text-white-50 text-center">Tidak ada artikel ditemukan.</p>
-                </div>
+            <div className="position-relative overflow-hidden"
+              style={{ border: '1px solid rgba(0,195,255,0.25)', cursor: 'pointer' }}
+              onClick={() => navigate('/apod')}>
+              {apod.media_type === 'image' ? (
+                <img src={apod.url} alt={apod.title} className="w-100 d-block" style={{ maxHeight: 420, objectFit: 'cover' }} />
+              ) : (
+                <div className="ratio ratio-16x9"><iframe src={apod.url} title={apod.title} allowFullScreen /></div>
               )}
-              {filtered.map((artikel) => (
-                <div className="col-12 col-md-6 col-lg-4" key={artikel.id}>
-                  <div className="article-card h-100 p-4 bg-black text-white rounded-0 border border-1 border-secondary">
-                    <div className="d-flex align-items-center mb-2 text-primary">
-                      <StarBadge />
-                      <h3 className="h5 mb-0 fw-semibold">{artikel.title}</h3>
-                    </div>
-                    <small className="text-white-50 d-block mb-2">{artikel.category} • {artikel.author}</small>
-                    <p className="text-white-50 mb-4">{artikel.content.substring(0, 100)}...</p>
-                    <div className="mt-auto">
-                      <button
-                        className="btn btn-outline-neon btn-sm rounded-0 px-4"
-                        onClick={() => navigate(`/artikel/${artikel.id}`)}
-                      >
-                        Baca Selengkapnya
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))}
+              <div className="position-absolute bottom-0 start-0 end-0 p-4"
+                style={{ background: 'linear-gradient(transparent, rgba(0,0,0,0.88))' }}>
+                <small className="text-white-50 d-block">{apod.date}</small>
+                <h2 className="h4 fw-bold text-white mb-1">{apod.title}</h2>
+                <p className="text-white-50 mb-0 small">{apod.explanation.substring(0, 120)}...</p>
+              </div>
             </div>
+          </div>
+        )}
 
+        {/* NASA Library Banner */}
+        <div
+          className="mb-5 p-4 d-flex flex-column flex-md-row align-items-center justify-content-between gap-3"
+          style={{ background: 'rgba(0,195,255,0.04)', border: '1px solid rgba(0,195,255,0.18)', cursor: 'pointer' }}
+          onClick={() => navigate('/nasa-library')}
+        >
+      <div>
+          <div className="d-flex align-items-center mb-2" style={{ color: '#09f' }}>
+              <StarBadge />
+              <span className="text-uppercase small" style={{ letterSpacing: '0.3em' }}>NASA Image & Video Library</span>
+          </div>
+          <h3 className="fw-bold text-white mb-1" style={{ fontSize: '1.1rem' }}>
+              Jelajahi Arsip Media NASA
+          </h3>
+          <p className="text-white-50 mb-0 small">
+              Ribuan foto dan video langsung dari arsip NASA — dari misi Apollo hingga James Webb.
+          </p>
+      </div>
+          <span style={{ color: '#09f', fontSize: '0.85rem', letterSpacing: '0.1em', whiteSpace: 'nowrap' }}>
+              Buka Library →
+          </span>
+      </div>      
+        
+        {/* Header */}
+        <div className="pb-4 mb-5" style={{ borderBottom: '1px solid rgba(0,195,255,0.15)' }}>
+          <div className="d-flex align-items-center mb-2" style={{ color: '#09f' }}>
+            <StarBadge />
+            <span className="text-uppercase small" style={{ letterSpacing: '0.3em' }}>Daftar Artikel</span>
+          </div>
+          <h1 className="fw-bold text-white mb-2" style={{ letterSpacing: '0.2em' }}>Koleksi Artikel Astronomi</h1>
+          <p className="text-white-50 mb-0">Jelajahi artikel edukatif seputar astronomi dan luar angkasa.</p>
+        </div>
+
+        {/* Search */}
+        <div className="row mb-5">
+          <div className="col-12 col-md-6">
+            <div className="d-flex" style={{ border: '1px solid rgba(0,195,255,0.25)', background: 'rgba(0,195,255,0.03)' }}>
+              <input type="search" className="form-control rounded-0 border-0 bg-transparent text-white"
+                placeholder="Cari artikel astronomi..." value={query}
+                onChange={(e) => setQuery(e.target.value)} style={{ minHeight: 48 }} />
+              <button className="btn rounded-0 px-4"
+                style={{ border: 'none', borderLeft: '1px solid rgba(0,195,255,0.25)', color: 'rgba(255,255,255,0.5)', background: 'transparent', fontSize: '0.8rem' }}
+                onClick={() => setQuery('')}>Clear</button>
+            </div>
           </div>
         </div>
-      </div>
 
-      <style>{`
-        .letter-spacing-2 { letter-spacing: 0.30em; }
-        .badge-icon {
-          width: 32px; height: 32px; border-radius: 50%;
-          border: 1px solid rgba(0, 195, 255, 0.35);
-          color: #09f; background: rgba(0, 195, 255, 0.08);
-        }
-        .btn-outline-neon {
-          color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.22);
-          background: rgba(255, 255, 255, 0.02);
-          transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
-        }
-        .btn-outline-neon:hover {
-          background: rgba(255, 255, 255, 0.10);
-          box-shadow: 0 0 12px rgba(255, 255, 255, 0.12);
-          transform: translateY(-2px); color: #ffffff;
-        }
-        .article-card {
-          background: #07101b; border-color: rgba(255, 255, 255, 0.12);
-          transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
-        }
-        .article-card:hover {
-          transform: translateY(-4px); border-color: rgba(255, 255, 255, 0.35);
-          box-shadow: 0 0 14px rgba(255, 255, 255, 0.10);
-        }
-      `}</style>
+        {loading && <div className="text-center py-5"><div className="spinner-border" style={{ color: '#09f' }} /></div>}
+        {error && <div className="alert alert-danger">{error}</div>}
+
+        <div className="row g-4">
+          {!loading && filtered.length === 0 && (
+            <div className="col-12 text-center text-white-50 py-5">Tidak ada artikel ditemukan.</div>
+          )}
+          {filtered.map(article => (
+            <div key={article.id} className="col-12 col-md-6 col-lg-4">
+              <ArticleCard article={article} onClick={() => navigate(`/artikel/${article.id}`)} />
+            </div>
+          ))}
+        </div>
+      </div>
     </section>
   );
 }
