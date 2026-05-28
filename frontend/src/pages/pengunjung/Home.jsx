@@ -12,7 +12,7 @@ const StarBadge = () => (
   </span>
 );
 
-  const ArticleCard = ({ article, onClick }) => {
+const ArticleCard = ({ article, onClick }) => {
   const [imgSrc, setImgSrc] = useState(article.image || null);
   const [imgLoading, setImgLoading] = useState(!article.image);
 
@@ -96,21 +96,41 @@ export default function Home() {
               <StarBadge />
               <span className="text-uppercase small" style={{ letterSpacing: '0.3em' }}>Astronomy Picture of the Day</span>
             </div>
-            <div className="position-relative overflow-hidden"
-              style={{ border: '1px solid rgba(0,195,255,0.25)', cursor: 'pointer' }}
-              onClick={() => navigate('/apod')}>
-              {apod.media_type === 'image' ? (
-                <img src={apod.url} alt={apod.title} className="w-100 d-block" style={{ maxHeight: 420, objectFit: 'cover' }} />
-              ) : (
-                <div className="ratio ratio-16x9"><iframe src={apod.url} title={apod.title} allowFullScreen /></div>
-              )}
-              <div className="position-absolute bottom-0 start-0 end-0 p-4"
-                style={{ background: 'linear-gradient(transparent, rgba(0,0,0,0.88))' }}>
-                <small className="text-white-50 d-block">{apod.date}</small>
-                <h2 className="h4 fw-bold text-white mb-1">{apod.title}</h2>
-                <p className="text-white-50 mb-0 small">{apod.explanation.substring(0, 120)}...</p>
+
+            {apod.media_type === 'image' ? (
+              // Image — bisa diklik ke /apod dengan overlay
+              <div className="position-relative overflow-hidden"
+                style={{ border: '1px solid rgba(0,195,255,0.25)', cursor: 'pointer' }}
+                onClick={() => navigate('/apod')}>
+                <img src={apod.url} alt={apod.title} className="w-100 d-block"
+                  style={{ maxHeight: 420, objectFit: 'cover' }} />
+                <div className="position-absolute bottom-0 start-0 end-0 p-4"
+                  style={{ background: 'linear-gradient(transparent, rgba(0,0,0,0.88))' }}>
+                  <small className="text-white-50 d-block">{apod.date}</small>
+                  <h2 className="h4 fw-bold text-white mb-1">{apod.title}</h2>
+                  <p className="text-white-50 mb-0 small">{apod.explanation.substring(0, 120)}...</p>
+                </div>
               </div>
-            </div>
+            ) : (
+              // Video — iframe tanpa overlay biar bisa diputar
+              <div style={{ border: '1px solid rgba(0,195,255,0.25)' }}>
+                <div className="ratio ratio-16x9">
+                  <iframe src={apod.url} title={apod.title} allowFullScreen />
+                </div>
+                <div className="p-3 d-flex justify-content-between align-items-center"
+                  style={{ background: 'rgba(0,195,255,0.04)' }}>
+                  <div>
+                    <small className="text-white-50 d-block">{apod.date}</small>
+                    <h2 className="h6 fw-bold text-white mb-0">{apod.title}</h2>
+                  </div>
+                  <button className="btn btn-sm rounded-0 px-3 flex-shrink-0"
+                    style={{ border: '1px solid rgba(0,195,255,0.3)', color: '#09f', background: 'transparent', fontSize: '0.78rem' }}
+                    onClick={() => navigate('/apod')}>
+                    Lihat Detail →
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         )}
 
@@ -120,22 +140,22 @@ export default function Home() {
           style={{ background: 'rgba(0,195,255,0.04)', border: '1px solid rgba(0,195,255,0.18)', cursor: 'pointer' }}
           onClick={() => navigate('/nasa-library')}
         >
-      <div>
-          <div className="d-flex align-items-center mb-2" style={{ color: '#09f' }}>
+          <div>
+            <div className="d-flex align-items-center mb-2" style={{ color: '#09f' }}>
               <StarBadge />
               <span className="text-uppercase small" style={{ letterSpacing: '0.3em' }}>NASA Image & Video Library</span>
-          </div>
-          <h3 className="fw-bold text-white mb-1" style={{ fontSize: '1.1rem' }}>
+            </div>
+            <h3 className="fw-bold text-white mb-1" style={{ fontSize: '1.1rem' }}>
               Jelajahi Arsip Media NASA
-          </h3>
-          <p className="text-white-50 mb-0 small">
+            </h3>
+            <p className="text-white-50 mb-0 small">
               Ribuan foto dan video langsung dari arsip NASA — dari misi Apollo hingga James Webb.
-          </p>
-      </div>
+            </p>
+          </div>
           <span style={{ color: '#09f', fontSize: '0.85rem', letterSpacing: '0.1em', whiteSpace: 'nowrap' }}>
-              Buka Library →
+            Buka Library →
           </span>
-      </div>      
+        </div>      
         
         {/* Header */}
         <div className="pb-4 mb-5" style={{ borderBottom: '1px solid rgba(0,195,255,0.15)' }}>
