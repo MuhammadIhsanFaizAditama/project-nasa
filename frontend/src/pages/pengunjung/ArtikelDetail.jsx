@@ -80,23 +80,23 @@ export default function ArtikelDetail() {
             style={{ maxHeight: 420, objectFit: 'cover', border: '1px solid rgba(0,195,255,0.15)' }} />
         )}
 
-        <div style={{ marginTop: '0.5rem' }}>
-          {paragraphs.map((para, i) => (
-            <p key={i} style={{
-              lineHeight: 1.9,
-              color: i === 0 ? 'rgba(255,255,255,0.82)' : 'rgba(255,255,255,0.68)',
+      <div style={{
+          marginTop: '0.5rem',
+          borderLeft: '2px solid rgba(0,195,255,0.3)',
+          paddingLeft: '1.5rem',
+      }}>
+        {paragraphs.map((para, i) => (
+           <p key={i} style={{
+              lineHeight: 2,
+              color: 'rgba(255,255,255,0.75)',
               fontSize: '1.05rem',
-              marginBottom: '1.5rem',
-              textIndent: i === 0 ? 0 : '1.5rem',
-              ...(i === 0 && {
-                paddingLeft: '1rem',
-                borderLeft: '2px solid rgba(0,195,255,0.4)',
-              }),
+              marginBottom: '1.6rem',
+              letterSpacing: '0.01em',
             }}>
               {para}
-            </p>
-          ))}
-        </div>
+          </p>
+        ))}
+      </div>
 
         <div className="mt-5 pt-4" style={{ borderTop: '1px solid rgba(255,255,255,0.08)' }}>
           <button className="btn btn-sm rounded-0 px-4"
