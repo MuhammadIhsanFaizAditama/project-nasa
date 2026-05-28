@@ -49,12 +49,12 @@ php artisan key:generate
 ```
 
 ### 5. Konfigurasi database
-Buat database baru bernama `wahyudi_nasa` di phpMyAdmin atau HeidiSQL, lalu edit file `.env`:
+Buat database baru bernama `project_nasa` di phpMyAdmin atau HeidiSQL, lalu edit file `.env`:
 ```env
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
 DB_PORT=3306
-DB_DATABASE=wahyudi_nasa
+DB_DATABASE=project_nasa
 DB_USERNAME=root
 DB_PASSWORD=
 ```
