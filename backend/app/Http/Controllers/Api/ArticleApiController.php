@@ -55,6 +55,7 @@ class ArticleApiController extends Controller
             'title' => 'required|string|max:255',
             'content' => 'required|string',
             'category_id' => 'required|exists:categories,id',
+            'image'       => 'nullable|string',
         ]);
 
         $validated['user_id'] = Auth::id() ?: 1; // Fallback to user 1 if not explicitly authenticated (or default admin)
@@ -90,6 +91,7 @@ class ArticleApiController extends Controller
             'title' => 'required|string|max:255',
             'content' => 'required|string',
             'category_id' => 'required|exists:categories,id',
+            'image'       => 'nullable|string',
         ]);
 
         $validated['slug'] = Str::slug($request->title) . '-' . time();
